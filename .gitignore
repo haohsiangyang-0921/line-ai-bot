@@ -1,0 +1,13 @@
+# 機密設定（絕對不能上傳至 GitHub）
+.env
+.env.local
+
+# Python 虛擬環境與快取
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 系統快取檔
+Thumbs.db
+.DS_Store
