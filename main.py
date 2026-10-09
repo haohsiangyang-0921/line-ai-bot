@@ -20,10 +20,13 @@ from linebot.v3.messaging import (
     ReplyMessageRequest,
     TextMessage
 )
-from linebot.v3.webhooks import MessageEvent, TextMessageContent
+from linebot.v3.webhooks import (
+    MessageEvent,
+    TextMessageContent
+)
 from services.ai_service import generate_reply, init_ai
 
-app = FastAPI(title="LINE AI Bot", description="LINE Bot powered by FastAPI and Google Gemini")
+app = FastAPI(title="LINE AI Bot", description="LINE Bot powered by FastAPI and Google Gemini (Improved Edition)")
 
 # 讀取金鑰配置
 CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET", "").strip()
@@ -54,7 +57,8 @@ async def root():
     
     return {
         "status": "online",
-        "service": "LINE AI Bot",
+        "service": "LINE AI Bot 改善版",
+        "version": "2.0.0",
         "line_credentials_configured": is_line_ready,
         "gemini_api_configured": is_gemini_ready,
         "mode": "Gemini AI" if is_gemini_ready else "Echo Test Mode"
@@ -62,8 +66,7 @@ async def root():
 
 @app.post("/callback")
 async def callback(request: Request, x_line_signature: str = Header(None)):
-    """接收 LINE Webhook 請求的核心路由"""
-    # 重新讀取（方便使用者更新 .env 後不必重啟）
+    """接收 LINE Webhook 請求的核心路由（改善版：支援多媒體提示、空白過濾與 /help 指令）"""
     current_secret = os.getenv("LINE_CHANNEL_SECRET", "").strip()
     current_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "").strip()
 
@@ -91,26 +94,74 @@ async def callback(request: Request, x_line_signature: str = Header(None)):
         raise HTTPException(status_code=400, detail=str(e))
 
     for event in events:
-        # 只處理使用者發送的純文字訊息
-        if isinstance(event, MessageEvent) and isinstance(event.message, TextMessageContent):
-            user_text = event.message.text
-            logger.info(f"收到來自使用者訊息: {user_text}")
+        if not isinstance(event, MessageEvent):
+            continue
 
-            # 呼叫 AI 服務取得回答
-            reply_text = await generate_reply(user_text)
+        reply_text = ""
 
-            # 回覆訊息給 LINE 使用者
-            try:
-                with ApiClient(local_config) as api_client:
-                    line_bot_api = MessagingApi(api_client)
-                    line_bot_api.reply_message(
-                        ReplyMessageRequest(
-                            reply_token=event.reply_token,
-                            messages=[TextMessage(text=reply_text)]
-                        )
+        # 情境 A：使用者發送純文字訊息
+        if isinstance(event.message, TextMessageContent):
+            raw_text = event.message.text
+            user_text = raw_text.strip()
+            logger.info(f"收到文字訊息: '{raw_text}'")
+
+            # 改善點 1：情境【輸入不完整或純空白】防護檢核
+            if not user_text:
+                reply_text = (
+                    "⚠️ 【輸入提示】您輸入的內容似乎是空的或只有空白字元！\n\n"
+                    "請輸入具體的問題或任務，例如：\n"
+                    "• 「請幫我寫一封英文請假信」\n"
+                    "• 「什麼是機器學習？」\n"
+                    "• 輸入「/help」查看更多使用指引。"
+                )
+            # 改善點 2：內建指令支援 /help 與 /about
+            elif user_text.lower() in ["/help", "help", "說明", "幫助"]:
+                reply_text = (
+                    "🤖 【AI 智慧小助理 - 使用指南】\n\n"
+                    "📌 核心功能：\n"
+                    "• 自然語言智能對話（由 Google Gemini 驅動）\n"
+                    "• 文本翻譯、程式撰寫、概念解說\n\n"
+                    "💡 快速指令：\n"
+                    "• 輸入「/help」：查看操作說明\n"
+                    "• 輸入「/about」：查看系統版本狀態\n"
+                    "• 直接輸入任意文字：立即開始與 AI 對話！\n\n"
+                    "⚠️ 提醒：目前僅支援文字對話，不支援貼圖、語音與圖片分析。"
+                )
+            elif user_text.lower() in ["/about", "about", "關於"]:
+                reply_text = (
+                    "ℹ️ 【LINE AI Bot 系統資訊】\n\n"
+                    "• 專案版本：v2.0 課後改善版\n"
+                    "• 後端技術：Python FastAPI + line-bot-sdk v3\n"
+                    "• AI 模型：Google Gemini 3.8 Flash\n"
+                    "• 服務狀態：24小時運行在線"
+                )
+            # 改善點 3：情境【正常使用】呼叫 AI
+            else:
+                reply_text = await generate_reply(user_text)
+
+        # 改善點 4：情境【不支援的輸入】（貼圖、照片、語音、影片等）
+        else:
+            msg_type = type(event.message).__name__
+            logger.info(f"收到非文字訊息 (型態: {msg_type})")
+            reply_text = (
+                "💡 【不支援的訊息格式】\n\n"
+                "抱歉！目前小助理只支援「純文字」對話喔！\n"
+                "暫時無法解析貼圖、照片、語音訊息或檔案。\n\n"
+                "👉 請直接輸入文字提出您的問題，或輸入「/help」查看使用指南。"
+            )
+
+        # 統一回覆訊息給使用者
+        try:
+            with ApiClient(local_config) as api_client:
+                line_bot_api = MessagingApi(api_client)
+                line_bot_api.reply_message(
+                    ReplyMessageRequest(
+                        reply_token=event.reply_token,
+                        messages=[TextMessage(text=reply_text)]
                     )
-                logger.info(f"成功回覆訊息: {reply_text[:30]}...")
-            except Exception as e:
-                logger.error(f"LINE 訊息回覆失敗: {e}")
+                )
+            logger.info(f"成功回覆訊息 (前30字): {reply_text[:30]}...")
+        except Exception as e:
+            logger.error(f"LINE 訊息回覆失敗: {e}")
 
     return JSONResponse(content={"status": "OK"})
