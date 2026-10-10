@@ -99,7 +99,7 @@
       padding: 1.5rem 0 0.5rem;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
     }
     .slide-footer {
       display: flex;
@@ -151,6 +151,10 @@
       padding: 2px 6px;
       border-radius: 4px;
       font-weight: bold;
+    }
+    .status-badge.warning {
+      color: #FBBF24;
+      background: rgba(251, 191, 36, 0.15);
     }
 
     .cover-content {
@@ -226,11 +230,11 @@
       <div class="grid-2" style="margin-top: 1.5rem;">
         <div class="card-box">
           <h3>🎯 想解決的問題</h3>
-          <p>日常查資料、撰寫文本與概念問答常需切換專用 AI 軟體；傳統聊天機器人遇到貼圖或空白訊息時，常發生「已讀不回」或崩潰報錯的痛點。</p>
+          <p>日常查資料、撰寫文本與概念問答常需切換專用 AI 軟體；傳統聊天機器人遇到非文字訊息時容易「已讀不回」，且本機測試常需開啟多個終端視窗造成使用不便。</p>
         </div>
         <div class="card-box">
           <h3>👥 目標對象與核心價值</h3>
-          <p>鎖定學生、自學者與一般 LINE 用戶。透過天天都在用的通訊軟體，直接獲得 Gemini 大語言模型的 24 小時即時解答與防呆保護。</p>
+          <p>鎖定學生、自學者與一般 LINE 用戶。透過天天都在用的通訊軟體，直接獲得 Gemini 大語言模型的即時解答，並讓本地運行更加輕量便捷。</p>
         </div>
       </div>
     </div>
@@ -251,17 +255,16 @@
         <div class="card-box">
           <h3>🌟 第一版核心功能</h3>
           <ul>
-            <li><strong>Gemini 智慧問答</strong>：即時解析使用者自然語言並生成繁體中文回覆。</li>
-            <li><strong>嚴格簽章檢驗</strong>：HMAC-SHA256 驗證 <code>X-Line-Signature</code>，確保請求安全性。</li>
-            <li><strong>雙模式自動備援</strong>：無金鑰自動降級為 Echo 測試模式。</li>
+            <li><strong>Gemini 智慧問答</strong>：解析使用者自然語言訊息，呼叫 Google Gemini 生成繁體中文回覆。</li>
+            <li><strong>簽章安全校驗</strong>：HMAC-SHA256 驗證 <code>X-Line-Signature</code>，確保請求合法安全。</li>
+            <li><strong>雙模式自動備援</strong>：未設定金鑰時自動降級為 Echo 模式，保證服務基本可用。</li>
           </ul>
         </div>
         <div class="card-box" style="border-color: var(--primary);">
           <h3>🚀 v2.0 改善版核心升級</h3>
           <ul>
-            <li><strong>不支援輸入友善導引</strong>：收到貼圖或照片時主動提示「僅支援純文字」，告別已讀不回！</li>
-            <li><strong>空白輸入防呆檢驗</strong>：自動過濾純空格並溫馨引導使用者提問範例。</li>
-            <li><strong>內建指令系統</strong>：支援 <code>/help</code>（使用指南）與 <code>/about</code>（狀態）。</li>
+            <li><strong>終端運行流程大幅改善（免黑窗）</strong>：原本需要在電腦桌面上常駐開啟兩個黑色命令提示字元視窗（FastAPI 伺服器與 ngrok 穿透），容易佔用螢幕且易被誤關；改善為製作腳本，實現<strong>「一鍵在電腦背景隱藏運行」</strong>與<strong>「一鍵停止關閉」</strong>，讓桌面乾淨無干擾。</li>
+            <li><strong>不支援輸入友善導引</strong>：收到貼圖或照片時主動提示「僅支援純文字對話」，減少使用者因已讀不回產生的困惑。</li>
           </ul>
         </div>
       </div>
@@ -279,12 +282,12 @@
       <div class="slide-tag">Page 3 / 5</div>
     </div>
     <div class="slide-body">
-      <p style="margin-bottom: 0.75rem; color: var(--text-muted);">親自測試三大關鍵情境，確保核心對話與邊界防護均通過驗證：</p>
+      <p style="margin-bottom: 0.75rem; color: var(--text-muted);">親自測試三大關鍵情境，如實記錄實測結果與目前運作狀態：</p>
       <table>
         <thead>
           <tr>
             <th>測試情境</th>
-            <th>輸入內容</th>
+            <th>輸入內容 / 操作方式</th>
             <th>預期結果</th>
             <th>實際結果</th>
             <th>狀態</th>
@@ -295,22 +298,22 @@
             <td><strong>1. 正常使用</strong></td>
             <td>「請用繁體中文解釋 API，並舉生活例子」</td>
             <td>Gemini 條理分明回覆比喻（如餐廳服務生）</td>
-            <td>1.5 秒內完整回傳生動繁體中文比喻</td>
+            <td>1.5 秒內順利完整回傳生動繁體中文比喻</td>
             <td><span class="status-badge">通過</span></td>
           </tr>
           <tr>
-            <td><strong>2. 輸入不完整</strong></td>
-            <td><code>&nbsp;&nbsp;&nbsp;</code>（三個連續空白字元）</td>
-            <td>攔截空白輸入，提示補充問題與範例</td>
-            <td>回傳輸入為空提示，並提示具體提問範例</td>
-            <td><span class="status-badge">通過</span></td>
+            <td><strong>2. 運行改善測試</strong></td>
+            <td>執行「一鍵隱藏啟動.vbs」與「一鍵關閉停止.bat」</td>
+            <td>原本要在電腦開兩個終端運行，變成可一鍵在電腦背景運行和關閉</td>
+            <td>可成功在背景隱形運作與關閉，但偶爾進程殘留或需重新執行</td>
+            <td><span class="status-badge warning">時好時壞</span></td>
           </tr>
           <tr>
             <td><strong>3. 不支援的輸入</strong></td>
             <td>傳送 LINE 貼圖一張或照片</td>
-            <td>攔截非文字事件，告知僅支援文字</td>
-            <td>回傳「不支援訊息格式」提示並附操作指南</td>
-            <td><span class="status-badge">通過</span></td>
+            <td>攔截非文字事件，告知目前僅支援文字並導引提問</td>
+            <td>有時能正常回傳提示訊息，但偶爾因連線或格式問題未成功觸發</td>
+            <td><span class="status-badge warning">時好時壞</span></td>
           </tr>
         </tbody>
       </table>
@@ -339,7 +342,7 @@
           <h3>🔍 檢查並修正 AI 產出的真實案例</h3>
           <ul>
             <li><strong>案例一：Windows 批次檔換行錯誤</strong><br>
-            AI 最初產生的 <code>.bat</code> 包含 Linux LF 換行與特殊字元，導致 Windows 報錯 <code>'cho' 不是內部命令</code>。經檢查後改寫為二進位 CRLF (<code>\r\n</code>) 成功解決。</li>
+            AI 最初產生的 <code>.bat</code> 包含 Linux LF 換行與特殊字元，導致 Windows 報錯 <code>'cho' 不是內部命令</code>。經手動檢查後改寫為二進位 CRLF (<code>\r\n</code>) 成功解決。</li>
             <li><strong>案例二：模型名稱過期修正</strong><br>
             AI 原先採用 <code>gemini-2.5-flash</code>，連線時遭 Google API 提示 404 已下線。經手動查詢模型清單後，修正為最新的 <code>gemini-3.8-flash</code>。</li>
           </ul>
@@ -363,16 +366,17 @@
         <div class="card-box">
           <h3>🎓 學習收穫與心得</h3>
           <ul>
-            <li>掌握 Webhook 核心原理與非同步 API 實作。</li>
-            <li>理解反向代理（ngrok）與 HMAC 數位簽章防偽價值。</li>
-            <li>深刻體會「工程師親自除錯與驗證」是 AI 協作不可或缺的核心環節。</li>
+            <li>清楚知道 Webhook 與 ngrok 的通訊與穿透原理。</li>
+            <li>原來要在 LINE 接入 AI 其實相當不容易（牽涉金鑰驗證、網路穿透、SDK 配置等繁瑣流程）。</li>
+            <li>不敢想像如果沒有 AI 幫助，自己從零摸索會用多久時間。</li>
           </ul>
         </div>
         <div class="card-box">
           <h3>⚠️ 已知限制與下一步</h3>
           <ul>
-            <li><strong>多輪對話記憶</strong>：目前為單次問答無狀態模式，下一版擬導入 Redis/SQLite 快取歷史。</li>
-            <li><strong>多模態整合</strong>：預計升級 Gemini Vision，讓小助理看懂使用者上傳的照片與圖表！</li>
+            <li><strong>目前能用到雲端的軟體皆須付費</strong>：嘗試部屬至 Render、Zeabur 等雲端時皆遇信用卡或付費買伺服器門檻，無法輕易免費託管。</li>
+            <li><strong>讓一鍵執行與關閉更正常</strong>：持續優化背景執行腳本，改善偶爾進程卡住的現象。</li>
+            <li><strong>遇到不支援的貼圖文字也能更穩定回應</strong>：持續強化例外處理與非文字訊息應答能力。</li>
           </ul>
         </div>
       </div>

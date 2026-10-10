@@ -148,54 +148,10 @@
       color: #4ade80;
       border: 1px solid rgba(6, 199, 85, 0.4);
     }
-    /* Code Box */
-    pre, code {
-      font-family: Consolas, Monaco, monospace;
-    }
-    pre {
-      background: #090D16;
-      border: 1px solid var(--border);
-      padding: 1rem;
-      border-radius: 0.5rem;
-      overflow-x: auto;
-      color: #E2E8F0;
-      font-size: 0.9rem;
-      margin: 0.75rem 0;
-    }
-    /* Chat bubbles */
-    .chat-mock {
-      background: #7297C5;
-      border-radius: 1rem;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      max-width: 550px;
-      margin: 1rem auto;
-    }
-    .bubble {
-      max-width: 80%;
-      padding: 0.75rem 1rem;
-      border-radius: 1rem;
-      font-size: 0.92rem;
-      line-height: 1.5;
-    }
-    .bubble.user {
-      align-self: flex-end;
-      background: #88E788;
-      color: #000;
-      border-bottom-right-radius: 2px;
-    }
-    .bubble.bot {
-      align-self: flex-start;
-      background: #FFFFFF;
-      color: #000;
-      border-bottom-left-radius: 2px;
-    }
-    .bubble-name {
-      font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.8);
-      margin-bottom: 2px;
+    .status-warn {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.4);
     }
     /* Buttons */
     .btn-group {
@@ -251,11 +207,11 @@
       <div class="grid-2">
         <div class="feature-item">
           <strong>🎯 想解決的問題</strong>
-          <p>使用者日常生活常有查資料、英文寫作修飾、概念解惑的需求，但經常得反覆切換專用 AI 網頁或軟體；同時傳統客服機器人遇到使用者傳送貼圖或空白訊息時，往往直接崩潰或靜默已讀不回。</p>
+          <p>日常生活常有查資料、英文寫作修飾、概念解惑的需求，但經常得反覆切換專用 AI 軟體；傳統聊天機器人遇到非文字訊息時容易「已讀不回」，且本機測試常需開啟多個終端視窗造成使用不便。</p>
         </div>
         <div class="feature-item">
           <strong>👥 目標使用對象</strong>
-          <p>學生、自學者與一般大眾。在熟悉的 LINE 聊天室中，就能隨手獲得 24 小時在線的 AI 智慧助理解答。</p>
+          <p>學生、自學者與一般大眾。在熟悉的 LINE 聊天室中，就能隨手獲得 24 小時在線的 AI 智慧助理解答，並讓本機運行更簡潔。</p>
         </div>
       </div>
 
@@ -263,8 +219,8 @@
       <ul>
         <li><strong>自然語言智慧問答</strong>：串接 Google 官方最新 <code>gemini-3.8-flash</code> 模型，具備高度語境理解能力。</li>
         <li><strong>嚴格簽名安全校驗</strong>：使用 HMAC-SHA256 驗證 <code>X-Line-Signature</code>，杜絕惡意偽造請求。</li>
-        <li><strong>雙模式自動備援機制</strong>：未設定 Gemini 金鑰時自動降級至 Echo 模式，保障服務高可用性。</li>
-        <li><strong>背景無感運作</strong>：本機專屬隱藏執行腳本，完全免除黑色視窗干擾。</li>
+        <li><strong>雙模式自動備援機制</strong>：未設定 Gemini 金鑰時自動降級至 Echo 模式，保障服務基本可用。</li>
+        <li><strong>一鍵背景隱形運作</strong>：解決原本需常駐開啟兩個終端命令視窗的困擾。</li>
       </ul>
     </section>
 
@@ -286,30 +242,28 @@
           <tr>
             <td><strong>1. 原本的問題</strong></td>
             <td>
-              • 第一版機器人僅接收文字訊息，若使用者傳送<strong>貼圖、照片、語音</strong>等非文字內容時，伺服器直接忽略無回音（已讀不回）。<br>
-              • 使用者若誤觸送出<strong>純空白鍵</strong>，系統仍會浪費 Token 呼叫 AI 且回覆不知所云。<br>
-              • 缺乏操作說明指令，新使用者不知道該如何互動。
+              • <strong>終端機佔用困擾</strong>：原本要在電腦桌面上常駐開啟兩個黑色的命令提示字元視窗（FastAPI 伺服器與 ngrok 穿透），不僅佔用螢幕桌面，還容易被誤關導致機器人下線。<br>
+              • <strong>非文字無回應</strong>：第一版僅處理文字，遇到貼圖或照片時直接忽略無聲（已讀不回）。
             </td>
           </tr>
           <tr>
             <td><strong>2. 修改內容</strong></td>
             <td>
-              • 於 <code>main.py</code> 擴充事件判斷：將非 <code>TextMessageContent</code> 事件統一攔截，回傳格式導引。<br>
-              • 新增字串去除空白檢核（<code>strip()</code>），若為空則主動提醒補充具體提問並附範例。<br>
-              • 內建 <code>/help</code> 與 <code>/about</code> 快速指令，隨時查詢機器人功能與版本。
+              • <strong>製作一鍵背景運行腳本</strong>：撰寫 <code>一鍵隱藏啟動.vbs</code> 與 <code>一鍵關閉停止.bat</code>，讓程式可以在 Windows 背景靜默運行與一鍵終止，免去常駐兩個黑色命令視窗。<br>
+              • <strong>非文字訊息攔截提示</strong>：在 <code>main.py</code> 擴充事件處理，收到貼圖或照片時嘗試回覆友善提示，告知目前僅支援文字對話。
             </td>
           </tr>
           <tr>
             <td><strong>3. 前後差異</strong></td>
             <td>
-              • <strong>改善前</strong>：傳貼圖 ➔ 機器人無反應；傳空白 ➔ 容易報錯或回傳空白。<br>
-              • <strong>改善後</strong>：傳貼圖 ➔ 友善提示「目前僅支援純文字對話」並導引提問；傳空白 ➔ 溫馨提醒「內容不能為空」並引導輸入範例。
+              • <strong>改善前</strong>：桌面常駐兩個黑視窗，使用電腦時容易被干擾或誤關；傳貼圖完全無反應。<br>
+              • <strong>改善後</strong>：點擊腳本即可在背景隱藏執行，桌面乾淨；傳貼圖時能嘗試提供提示導引。
             </td>
           </tr>
           <tr>
             <td><strong>4. 重新測試結果</strong></td>
             <td>
-              <span class="status-tag status-pass">全部通過</span> 經實測貼圖、空白及一般文字等三個情境，皆能 100% 準確給予對應回饋。
+              <span class="status-tag status-warn">時好時壞</span> 文字對話功能穩定通過，但背景腳本管理與非文字例外處理偶爾有進程殘留或未觸發情況，如實記錄並列入後續優化。
             </td>
           </tr>
         </tbody>
@@ -319,13 +273,13 @@
     <!-- 3. 三大測試情境證明 -->
     <section class="card">
       <h2>🧪 3. 實測情境與驗證結果</h2>
-      <p>親自進行下列三種關鍵情境測試，確保核心邏輯與邊界防護均已正確生效：</p>
+      <p>親自進行下列三種關鍵情境測試，如實記錄實測結果與目前狀態：</p>
 
       <table>
         <thead>
           <tr>
             <th>測試情境</th>
-            <th>輸入內容</th>
+            <th>輸入內容 / 操作方式</th>
             <th>預期結果</th>
             <th>實際結果</th>
             <th>狀態</th>
@@ -334,40 +288,27 @@
         <tbody>
           <tr>
             <td><strong>情境一：正常使用</strong></td>
-            <td>「請用繁體中文解釋什麼是 API，並舉一個生活中的例子。」</td>
-            <td>Gemini 模型理解問題，在 2 秒內條理分明地回傳生動繁體中文比喻（如餐廳服務生）。</td>
-            <td>Gemini 3.8 Flash 順利回傳精確回答，排版清晰且具體易懂。</td>
+            <td>「請用繁體中文解釋 API，並舉生活例子」</td>
+            <td>Gemini 條理分明回覆比喻（如餐廳服務生）</td>
+            <td>1.5 秒內順利完整回傳生動繁體中文比喻</td>
             <td><span class="status-tag status-pass">通過</span></td>
           </tr>
           <tr>
-            <td><strong>情境二：輸入不完整</strong></td>
-            <td><code>&nbsp;&nbsp;&nbsp;</code>（三個連續空格）</td>
-            <td>系統檢測到空白輸入，拒絕空查詢，回傳提醒並給予使用者提問範例。</td>
-            <td>成功回傳「⚠️ 輸入內容似乎是空的或只有空白字元」，並附上提問範例與 <code>/help</code> 提示。</td>
-            <td><span class="status-tag status-pass">通過</span></td>
+            <td><strong>情境二：運行改善測試</strong></td>
+            <td>執行「一鍵隱藏啟動.vbs」與「一鍵關閉停止.bat」</td>
+            <td>原本要在電腦開兩個終端運行，變成可一鍵在電腦背景運行和關閉</td>
+            <td>可成功在背景隱形運作與關閉，但偶爾進程殘留或需重新執行</td>
+            <td><span class="status-tag status-warn">時好時壞</span></td>
           </tr>
           <tr>
             <td><strong>情境三：不支援的輸入</strong></td>
-            <td>傳送一張 LINE 熊大貼圖或照片</td>
-            <td>系統捕捉非文字訊息事件，回傳提示說明目前僅支援純文字並導引提問。</td>
-            <td>成功回傳「💡 抱歉！目前小助理只支援純文字對話喔！暫無法解析貼圖或檔案」。</td>
-            <td><span class="status-tag status-pass">通過</span></td>
+            <td>傳送 LINE 貼圖一張或照片</td>
+            <td>攔截非文字事件，告知目前僅支援文字並導引提問</td>
+            <td>有時能正常回傳提示訊息，但偶爾因連線或格式問題未成功觸發</td>
+            <td><span class="status-tag status-warn">時好時壞</span></td>
           </tr>
         </tbody>
       </table>
-
-      <h3 style="margin-top: 1.5rem;">📱 對話實測示範 (模擬效果)</h3>
-      <div class="chat-mock">
-        <div class="bubble-name">使用者</div>
-        <div class="bubble user">（傳送貼圖）</div>
-        <div class="bubble-name">AI 智慧小助理</div>
-        <div class="bubble bot">💡 【不支援的訊息格式】<br>抱歉！目前小助理只支援「純文字」對話喔！暫時無法解析貼圖或語音檔案。<br>👉 請直接輸入文字提出您的問題，或輸入「/help」查看使用指南。</div>
-
-        <div class="bubble-name">使用者</div>
-        <div class="bubble user">請用繁體中文解釋什麼是 API？</div>
-        <div class="bubble-name">AI 智慧小助理</div>
-        <div class="bubble bot">API（應用程式介面）就像是<strong>「餐廳的服務生」</strong>！<br>• 你是客人（顧客端的程式）<br>• 廚房是伺服器（存放資料與製作料理的地方）<br>• 服務生（API）負責把你點的菜送進廚房，並把煮好的餐點端出來給你！</div>
-      </div>
     </section>
 
     <!-- 4. 開發過程紀錄 -->
@@ -376,8 +317,8 @@
       <ol>
         <li><strong>階段一：架構計畫與金鑰申請</strong>：規劃 FastAPI 與 LINE Messaging API 的互動流程，於 LINE Developers 申請 Provider 與 Channel，取得 Channel Secret 與 Long-lived Token。</li>
         <li><strong>階段二：環境初始化與核心開發</strong>：建立 Python 3.12 虛擬環境，導入 <code>line-bot-sdk</code> v3 與 <code>google-genai</code> SDK，撰寫簽名校驗與 Webhook 路由。</li>
-        <li><strong>階段三：本地穿透與除錯驗證</strong>：配置 ngrok 進行本機端口對映，成功通過 LINE Webhook 簽名驗證，並在手機 LINE 上進行端對端 Echo 實測。</li>
-        <li><strong>階段四：Gemini AI 串接與改善版迭代</strong>：串接 Gemini 3.8 Flash 大模型，並依據課後回饋增加防呆空白過濾、貼圖友善導引與 <code>/help</code> 系統，完成 GitHub 提交。</li>
+        <li><strong>階段三：本地穿透與除錯驗證</strong>：配置 ngrok 進行本機端口對映，成功通過 LINE Webhook 簽名驗證，並在手機 LINE 上進行端對端實測。</li>
+        <li><strong>階段四：體驗優化與改善版迭代</strong>：串接 Gemini 3.8 Flash，並將原本需常駐兩終端機的流程升級為一鍵背景隱藏執行與關閉，完成 GitHub 提交。</li>
       </ol>
     </section>
 
@@ -398,7 +339,7 @@
       <h3 style="margin-top: 1.5rem;">🔍 檢查與修正 AI 產出的真實經驗</h3>
       <p>在開發過程中，並非全盤盲信 AI，而是親自進行了兩次重要的排錯與校正：</p>
       <ul>
-        <li><strong>經驗一（Windows 批次檔換行編碼修正）</strong>：AI 最初自動生成的 <code>run_ngrok.bat</code> 採用了 Linux LF 換行與 UTF-8 無 BOM 編碼，導致 Windows 內建的 <code>cmd.exe</code> 執行時發生位元組錯位，跳出 <code>'cho' 不是內部或外部命令</code> 的嚴重錯誤。經過手動除錯檢查，重新撰寫 Python 腳本以純 ASCII 與二進位 <code>CRLF (\r\n)</code> 格式重寫批次檔，徹底解決問題。</li>
+        <li><strong>經驗一（Windows 批次檔換行編碼修正）</strong>：AI 最初自動生成的 <code>run_ngrok.bat</code> 採用了 Linux LF 換行與特殊字元，導致 Windows 內建的 <code>cmd.exe</code> 執行時發生位元組錯位，跳出 <code>'cho' 不是內部命令</code> 的嚴重錯誤。經過手動除錯檢查，重新撰寫 Python 腳本以純 ASCII 與二進位 <code>CRLF (\r\n)</code> 格式重寫批次檔，徹底解決問題。</li>
         <li><strong>經驗二（Gemini 模型名稱過期修正）</strong>：AI 原先設定模型為 <code>gemini-2.5-flash</code>，執行時遭 Google 官方回傳 <code>404 NOT_FOUND: This model is no longer available</code>。隨後手動透過 <code>client.models.list()</code> 檢索目前可用清單，確認並修正為最新的 <code>gemini-3.8-flash</code> 模型，順利連線成功。</li>
       </ul>
     </section>
@@ -409,13 +350,18 @@
       <div class="grid-2">
         <div class="feature-item">
           <strong>🎓 學習心得</strong>
-          <p>透過這次作業，深入了解了 Webhook 的本質原理、HMAC-SHA256 數位簽章的防偽價值，以及如何運用反向代理（Reverse Proxy）打通本地開發環境與公有雲端服務的通訊。在 AI 協作方面，更深刻體會到「工程師具備程式碼審查與即時除錯能力」才是順利落地的關鍵。</p>
+          <p>
+            • 清楚知道 Webhook 與 ngrok 的通訊與穿透原理。<br>
+            • 原來要在 LINE 接入 AI 其實相當不容易（牽涉金鑰驗證、網路穿透、SDK 配置等繁瑣流程）。<br>
+            • 坦白說不敢想像如果沒有 AI 幫助，自己從零摸索會用多久時間。
+          </p>
         </div>
         <div class="feature-item">
           <strong>⚠️ 目前限制與未來展望</strong>
           <p>
-            • <strong>多輪對話記憶</strong>：目前每次請求為無狀態（Stateless），下一步規劃導入 Redis/SQLite 保留前 5 輪問答脈絡。<br>
-            • <strong>多模態辨識</strong>：目前已做到攔截貼圖與照片並友善提醒，未來可升級為 Gemini Vision，支援照片內容分析與圖片解題！
+            • <strong>目前能用到雲端的軟體皆須付費</strong>：嘗試部屬至 Render、Zeabur 等雲端時皆遇信用卡或付費買伺服器門檻，無法輕易免費託管。<br>
+            • <strong>讓一鍵執行與關閉更正常</strong>：持續優化背景執行腳本，改善偶爾進程殘留（時好時壞）的現象。<br>
+            • <strong>遇到不支援的貼圖文字也能更穩定回應</strong>：持續強化例外處理與非文字訊息應答能力。
           </p>
         </div>
       </div>
